@@ -12,9 +12,27 @@ export const Countdown = ({ minutes = 20, isPaused, onProgress, onEnd }) => {
   const interval  = React.useRef(null);
   const [milliSeconds, setMilliSeconds] = useState(null);
 
+  const countDown = () => {
+    setMilliSeconds((time) => {
+      if(time === 0){
+        clearInterval(interval.current)
+        return time;
+      }
+      const timeLeft = time - 1000
+      return timeLeft;
+    })
+  }
+
   useEffect(() => {
     setMilliSeconds(minutesToMilliSeconds(minutes))
   }, [minutes])
+
+  useEffect(() => {
+    onProgress(milliSeconds/minutesToMilliSeconds(minutes))
+    if(milliSeconds === 0){
+      onEnd();
+    }
+  },[milliSeconds])
 
   useEffect(() => {
     if(isPaused){
@@ -26,21 +44,6 @@ export const Countdown = ({ minutes = 20, isPaused, onProgress, onEnd }) => {
     return () => {clearInterval(interval.current )}
   }, [isPaused])
 
-  const countDown = () => {
-    setMilliSeconds((time) => {
-      if(time === 0){
-        clearInterval(interval.current)
-        onEnd();
-        return time;
-      }
-      const timeLeft = time - 1000
-      onProgress(timeLeft/minutesToMilliSeconds(minutes))
-      return timeLeft;
-    })
-  }
-
-
-  
 
   const minute = Math.floor(milliSeconds / 1000 / 60) % 60;
   const seconds = Math.floor(milliSeconds / 1000) % 60;
